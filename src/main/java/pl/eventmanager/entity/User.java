@@ -2,6 +2,7 @@ package pl.eventmanager.entity;
 
 import jakarta.persistence.*;
 import pl.eventmanager.enums.Role;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -23,6 +24,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
 
     public User() {
     }
@@ -61,5 +65,13 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
