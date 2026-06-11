@@ -16,5 +16,11 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+security:
+  jwt:
+    secret: ${JWT_SECRET:VGhpcy1pcy1hLWRldmVsb3BtZW50LWp3dC1zZWNyZXQta2V5LTEyMzQ1Njc4OTA=}
+    issuer: ${JWT_ISSUER:event-management-system}
+    expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
+
 server:
   port: ${SERVER_PORT:8080}
