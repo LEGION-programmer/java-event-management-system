@@ -92,4 +92,18 @@ class UserServiceImplTest {
         assertFalse(result);
         verify(userRepository).existsByUsernameIgnoreCase(username);
     }
+
+    @Test
+    void shouldFindUserById() {
+        Long id = 1L;
+        User user = new User();
+
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+        Optional<User> result = userService.findById(id);
+
+        assertTrue(result.isPresent());
+        assertSame(user, result.get());
+        verify(userRepository).findById(id);
+    }
 }

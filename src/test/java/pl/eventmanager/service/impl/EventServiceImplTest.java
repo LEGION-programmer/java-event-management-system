@@ -48,4 +48,27 @@ class EventServiceImplTest {
         assertEquals(2, result.size());
         verify(repository).findAll();
     }
+
+    @Test
+    void shouldFindEventById() {
+        Long id = 1L;
+        Event event = new Event();
+
+        when(repository.findById(id)).thenReturn(Optional.of(event));
+
+        Optional<Event> result = eventService.findById(id);
+
+        assertTrue(result.isPresent());
+        assertSame(event, result.get());
+        verify(repository).findById(id);
+    }
+
+    @Test
+    void shouldDeleteEvent() {
+        Long id = 1L;
+
+        eventService.delete(id);
+
+        verify(repository).deleteById(id);
+    }
 }
