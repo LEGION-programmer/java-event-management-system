@@ -65,13 +65,11 @@ class ReservationServiceImplTest {
         Long eventId = 10L;
 
         User user = mock(User.class);
-        when(user.getId()).thenReturn(userId);
 
         Event event = buildEvent(eventId, 5, 10);
 
         Reservation savedReservation = mock(Reservation.class);
         when(savedReservation.getId()).thenReturn(100L);
-        when(savedReservation.getEvent()).thenReturn(event);
         when(savedReservation.getStatus()).thenReturn(ReservationStatus.ACTIVE);
         when(savedReservation.getReservationDate()).thenReturn(LocalDateTime.now());
 
