@@ -6,11 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pl.eventmanager.dto.CreateEventRequest;
 import pl.eventmanager.dto.EventResponse;
 import pl.eventmanager.entity.Event;
@@ -47,6 +43,7 @@ public class EventController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         Long userId = Long.parseLong(jwt.getSubject());
+
         User creator = userService.findById(userId)
                 .orElseThrow(() -> new IllegalStateException(
                         "Authenticated user not found: " + userId
@@ -58,6 +55,9 @@ public class EventController {
         event.setLocation(request.getLocation());
         event.setEventDate(request.getEventDate());
         event.setCapacity(request.getCapacity());
+
+        event.setAvailableSeats(request.getCapacity());
+
         event.setCreatedBy(creator);
 
         Event saved = eventService.save(event);

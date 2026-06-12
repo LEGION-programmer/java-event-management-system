@@ -1,16 +1,6 @@
 package pl.eventmanager.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -46,11 +36,11 @@ public class Event {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    public Event() {
-    }
+    public Event() {}
 
     @PrePersist
     void prePersist() {
+
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }
@@ -60,75 +50,39 @@ public class Event {
         }
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public void setId(Long id) { this.id = id; }
 
-    public String getTitle() {
-        return title;
-    }
+    public String getTitle() { return title; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public void setTitle(String title) { this.title = title; }
 
-    public String getDescription() {
-        return description;
-    }
+    public String getDescription() { return description; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public void setDescription(String description) { this.description = description; }
 
-    public String getLocation() {
-        return location;
-    }
+    public String getLocation() { return location; }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
+    public void setLocation(String location) { this.location = location; }
 
-    public LocalDateTime getEventDate() {
-        return eventDate;
-    }
+    public LocalDateTime getEventDate() { return eventDate; }
 
-    public void setEventDate(LocalDateTime eventDate) {
-        this.eventDate = eventDate;
-    }
+    public void setEventDate(LocalDateTime eventDate) { this.eventDate = eventDate; }
 
-    public Integer getCapacity() {
-        return capacity;
-    }
+    public Integer getCapacity() { return capacity; }
 
-    public void setCapacity(Integer capacity) {
-        this.capacity = capacity;
-    }
+    public void setCapacity(Integer capacity) { this.capacity = capacity; }
 
-    public Integer getAvailableSeats() {
-        return availableSeats;
-    }
+    public Integer getAvailableSeats() { return availableSeats; }
 
-    public void setAvailableSeats(Integer availableSeats) {
-        this.availableSeats = availableSeats;
-    }
+    public void setAvailableSeats(Integer availableSeats) { this.availableSeats = availableSeats; }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public User getCreatedBy() {
-        return createdBy;
-    }
+    public User getCreatedBy() { return createdBy; }
 
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
-    }
+    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
 }

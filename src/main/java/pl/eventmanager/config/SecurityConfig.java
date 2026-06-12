@@ -15,11 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtValidators;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -43,41 +39,41 @@ public class SecurityConfig {
             DaoAuthenticationProvider authenticationProvider,
             JwtAuthenticationConverter jwtAuthenticationConverter
     ) throws Exception {
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/auth/register",
-                                "/api/auth/login"
-                        ).permitAll()
+                .authorizeHttpRequests(auth -> auth
+
+                        // AUTH
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // SWAGGER
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/events/**"
-                        ).permitAll()
+
+                        // EVENTS (public GET)
+                        .requestMatchers(HttpMethod.GET, "/api/events/**").permitAll()
+
+                        // EVERYTHING ELSE SECURED
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider)
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt
-                                .jwtAuthenticationConverter(
-                                        jwtAuthenticationConverter
-                                )
+                .oauth2ResourceServer(oauth2 ->
+                        oauth2.jwt(jwt ->
+                                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)
                         )
                 );
 
         return http.build();
     }
+
+    // ---------------- PASSWORD ----------------
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -93,7 +89,6 @@ public class SecurityConfig {
                 new DaoAuthenticationProvider(userDetailsService);
 
         provider.setPasswordEncoder(passwordEncoder);
-
         return provider;
     }
 
@@ -101,84 +96,72 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(
             DaoAuthenticationProvider authenticationProvider
     ) {
-        return new ProviderManager(
-                List.of(authenticationProvider)
-        );
+        return new ProviderManager(List.of(authenticationProvider));
     }
 
+    // ---------------- JWT ----------------
+
     @Bean
-    public SecretKey jwtSecretKey(
-            JwtProperties jwtProperties
-    ) {
-        byte[] decodedSecret;
+    public SecretKey jwtSecretKey(JwtProperties jwtProperties) {
+
+        byte[] decoded;
 
         try {
-            decodedSecret = Base64.getDecoder()
-                    .decode(jwtProperties.secret());
-        } catch (IllegalArgumentException exception) {
-            throw new IllegalStateException(
-                    "JWT secret must be valid Base64",
-                    exception
-            );
+            decoded = Base64.getDecoder().decode(jwtProperties.secret());
+        } catch (Exception e) {
+            throw new IllegalStateException("JWT secret must be Base64", e);
         }
 
-        if (decodedSecret.length < 32) {
-            throw new IllegalStateException(
-                    "JWT secret must contain at least 32 bytes"
-            );
+        if (decoded.length < 32) {
+            throw new IllegalStateException("JWT secret must be at least 32 bytes");
         }
 
-        return new SecretKeySpec(
-                decodedSecret,
-                "HmacSHA256"
-        );
+        return new SecretKeySpec(decoded, "HmacSHA256");
     }
 
     @Bean
-    public JwtEncoder jwtEncoder(
-            SecretKey jwtSecretKey
-    ) {
+    public JwtEncoder jwtEncoder(SecretKey secretKey) {
         return NimbusJwtEncoder
-                .withSecretKey(jwtSecretKey)
+                .withSecretKey(secretKey)
                 .algorithm(MacAlgorithm.HS256)
                 .build();
     }
 
     @Bean
     public JwtDecoder jwtDecoder(
-            SecretKey jwtSecretKey,
+            SecretKey secretKey,
             JwtProperties jwtProperties
     ) {
+
         NimbusJwtDecoder decoder = NimbusJwtDecoder
-                .withSecretKey(jwtSecretKey)
+                .withSecretKey(secretKey)
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
 
         decoder.setJwtValidator(
-                JwtValidators.createDefaultWithIssuer(
-                        jwtProperties.issuer()
-                )
+                JwtValidators.createDefaultWithIssuer(jwtProperties.issuer())
         );
 
         return decoder;
     }
 
+    // ---------------- ROLES MAPPING ----------------
+
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter authoritiesConverter =
+
+        JwtGrantedAuthoritiesConverter converter =
                 new JwtGrantedAuthoritiesConverter();
 
-        authoritiesConverter.setAuthoritiesClaimName("roles");
-        authoritiesConverter.setAuthorityPrefix("");
 
-        JwtAuthenticationConverter authenticationConverter =
+        converter.setAuthoritiesClaimName("roles");
+        converter.setAuthorityPrefix("");
+
+        JwtAuthenticationConverter authConverter =
                 new JwtAuthenticationConverter();
 
-        authenticationConverter
-                .setJwtGrantedAuthoritiesConverter(
-                        authoritiesConverter
-                );
+        authConverter.setJwtGrantedAuthoritiesConverter(converter);
 
-        return authenticationConverter;
+        return authConverter;
     }
 }
